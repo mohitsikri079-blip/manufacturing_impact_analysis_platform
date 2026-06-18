@@ -1,0 +1,155 @@
+### Product
+POST http://localhost:8080/api/v1/products
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "productId": "P100",
+  "code": "SENSOR-100",
+  "name": "Industrial Sensor"
+}
+
+### Revision A
+POST http://localhost:8080/api/v1/revisions
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "revisionId": "P100-REV-A",
+  "productId": "P100",
+  "code": "A",
+  "status": "APPROVED"
+}
+
+### Revision B
+POST http://localhost:8080/api/v1/revisions
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "revisionId": "P100-REV-B",
+  "productId": "P100",
+  "code": "B",
+  "status": "APPROVED"
+}
+
+### BOM for Revision A
+POST http://localhost:8080/api/v1/boms
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "revisionId": "P100-REV-A",
+  "components": [
+    { "componentId": "PCB-A", "quantity": 1 },
+    { "componentId": "SCREW", "quantity": 4 }
+  ]
+}
+
+### BOM for Revision B
+POST http://localhost:8080/api/v1/boms
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "revisionId": "P100-REV-B",
+  "components": [
+    { "componentId": "PCB-B", "quantity": 1 },
+    { "componentId": "SCREW", "quantity": 4 }
+  ]
+}
+
+### Supplier Mapping
+POST http://localhost:8080/api/v1/suppliers
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "componentId": "PCB-A",
+  "suppliers": [
+    { "supplierId": "SUP-ABC", "supplierName": "ABC Electronics", "leadTimeDays": 15 }
+  ]
+}
+
+### Inventory
+POST http://localhost:8080/api/v1/inventory
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "componentId": "PCB-A",
+  "warehouse": "WH1",
+  "quantity": 500,
+  "inventoryId": "INV-PCBA-WH1"
+}
+
+### Purchase Order
+POST http://localhost:8080/api/v1/purchase-orders
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "purchaseOrderId": "PO-100",
+  "supplierId": "SUP-ABC",
+  "componentId": "PCB-A",
+  "openQuantity": 1000
+}
+
+### Work Order
+POST http://localhost:8080/api/v1/work-orders
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "workOrderId": "WO-1001",
+  "revisionId": "P100-REV-B",
+  "status": "RELEASED",
+  "remainingQty": 50,
+  "priority": "HIGH",
+  "plannedCompletionDate": "20/02/2026"
+}
+
+### Sales Order
+POST http://localhost:8080/api/v1/sales-orders
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "salesOrderId": "SO-100",
+  "customerId": "CUST-100",
+  "customerName": "Acme Corp",
+  "productId": "P100",
+  "openQuantity": 25,
+  "orderValue": 50000,
+  "priority": "CRITICAL"
+}
+
+### Revision Impact
+POST http://localhost:8080/api/v1/impact-analysis
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "entityType": "REVISION",
+  "entityId": "P100-REV-B"
+}
+
+### Component Impact
+POST http://localhost:8080/api/v1/impact-analysis
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "entityType": "COMPONENT",
+  "entityId": "PCB-A"
+}
+
+### Supplier Impact
+POST http://localhost:8080/api/v1/impact-analysis
+X-API-Key: dev-api-key
+Content-Type: application/json
+
+{
+  "entityType": "SUPPLIER",
+  "entityId": "SUP-ABC"
+}
