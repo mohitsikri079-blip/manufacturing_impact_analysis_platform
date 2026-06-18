@@ -38,24 +38,22 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
             throw new ResourceNotFoundException("Supplier not found: " + supplierId);
         }
 
-        List<ComponentImpactItem> components = neo4jClient.query("""
+        List<ComponentImpactItem> components = query("""
                 MATCH (c:COMPONENT)-[:SUPPLIED_BY]->(:SUPPLIER {supplierId: $supplierId})
                 RETURN DISTINCT c.componentId AS componentId
                 ORDER BY c.componentId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(ComponentImpactItem.class)
                 .mappedBy((typeSystem, record) -> new ComponentImpactItem(nullableString(record, "componentId")))
                 .all()
                 .stream()
                 .toList();
 
-        List<ProductImpactItem> products = neo4jClient.query("""
+        List<ProductImpactItem> products = query("""
                 MATCH (p:PRODUCT)-[:HAS_REVISION]->(:REVISION)-[:USES_COMPONENT]->(:COMPONENT)-[:SUPPLIED_BY]->(:SUPPLIER {supplierId: $supplierId})
                 RETURN DISTINCT p.productId AS productId, p.name AS productName
                 ORDER BY p.productId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(ProductImpactItem.class)
                 .mappedBy((typeSystem, record) -> new ProductImpactItem(
                         nullableString(record, "productId"),
@@ -64,13 +62,12 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 .stream()
                 .toList();
 
-        List<ManufacturingImpact> workOrders = neo4jClient.query("""
+        List<ManufacturingImpact> workOrders = query("""
                 MATCH (wo:WORK_ORDER)-[:BUILDS]->(:REVISION)-[:USES_COMPONENT]->(:COMPONENT)-[:SUPPLIED_BY]->(:SUPPLIER {supplierId: $supplierId})
                 WHERE wo.status IN ['CREATED', 'RELEASED', 'IN_PROGRESS']
                 RETURN DISTINCT wo.workOrderId AS workOrderId, wo.status AS status, wo.remainingQuantity AS remainingQty
                 ORDER BY wo.workOrderId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(ManufacturingImpact.class)
                 .mappedBy((typeSystem, record) -> new ManufacturingImpact(
                         nullableString(record, "workOrderId"),
@@ -80,13 +77,12 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 .stream()
                 .toList();
 
-        List<SalesOrderImpact> salesOrders = neo4jClient.query("""
+        List<SalesOrderImpact> salesOrders = query("""
                 MATCH (:SUPPLIER {supplierId: $supplierId})<-[:SUPPLIED_BY]-(:COMPONENT)<-[:USES_COMPONENT]-(:REVISION)<-[:HAS_REVISION]-(p:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)
                 WHERE coalesce(so.openQuantity, 0) > 0
                 RETURN DISTINCT so.salesOrderId AS salesOrderId, so.orderValue AS orderValue
                 ORDER BY so.salesOrderId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(SalesOrderImpact.class)
                 .mappedBy((typeSystem, record) -> new SalesOrderImpact(
                         nullableString(record, "salesOrderId"),
@@ -95,13 +91,12 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 .stream()
                 .toList();
 
-        List<CustomerImpact> customers = neo4jClient.query("""
+        List<CustomerImpact> customers = query("""
                 MATCH (:SUPPLIER {supplierId: $supplierId})<-[:SUPPLIED_BY]-(:COMPONENT)<-[:USES_COMPONENT]-(:REVISION)<-[:HAS_REVISION]-(p:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)<-[:PLACED]-(c:CUSTOMER)
                 WHERE coalesce(so.openQuantity, 0) > 0
                 RETURN DISTINCT c.customerId AS customerId, c.customerName AS customerName, so.salesOrderId AS salesOrderId
                 ORDER BY c.customerId, so.salesOrderId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(CustomerImpact.class)
                 .mappedBy((typeSystem, record) -> new CustomerImpact(
                         nullableString(record, "customerId"),

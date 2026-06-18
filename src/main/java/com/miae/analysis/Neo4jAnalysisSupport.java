@@ -23,8 +23,7 @@ abstract class Neo4jAnalysisSupport {
     }
 
     protected boolean exists(String cypher, Map<String, Object> params) {
-        return neo4jClient.query(cypher)
-                .bindAll(params)
+        return query(cypher, params)
                 .fetchAs(Boolean.class)
                 .mappedBy((typeSystem, record) -> record.get("exists").asBoolean())
                 .one()
@@ -32,8 +31,7 @@ abstract class Neo4jAnalysisSupport {
     }
 
     protected List<String> stringList(String cypher, Map<String, Object> params, String field) {
-        return neo4jClient.query(cypher)
-                .bindAll(params)
+        return query(cypher, params)
                 .fetchAs(String.class)
                 .mappedBy((typeSystem, record) -> nullableString(record, field))
                 .all()
@@ -41,6 +39,11 @@ abstract class Neo4jAnalysisSupport {
                 .filter(value -> value != null && !value.isBlank())
                 .distinct()
                 .toList();
+    }
+
+    @SuppressWarnings("null")
+    protected Neo4jClient.RunnableSpec query(String cypher, Map<String, Object> params) {
+        return neo4jClient.query(cypher).bindAll(params);
     }
 
     protected String nullableString(Record record, String field) {

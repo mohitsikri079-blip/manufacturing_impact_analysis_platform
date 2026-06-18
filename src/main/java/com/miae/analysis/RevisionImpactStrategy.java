@@ -52,12 +52,11 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
 
         List<InventoryImpact> inventory = inventoryForComponents(obsoleteOrCurrentComponents);
         List<ProcurementImpact> purchaseOrders = purchaseOrdersForComponents(obsoleteOrCurrentComponents);
-        List<ManufacturingImpact> workOrders = neo4jClient.query("""
+        List<ManufacturingImpact> workOrders = query("""
                 MATCH (wo:WORK_ORDER)-[:BUILDS]->(:REVISION {revisionId: $revisionId})
                 RETURN wo.workOrderId AS workOrderId, wo.status AS status, wo.remainingQuantity AS remainingQty
                 ORDER BY wo.priority DESC, wo.workOrderId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(ManufacturingImpact.class)
                 .mappedBy((typeSystem, record) -> new ManufacturingImpact(
                         nullableString(record, "workOrderId"),
@@ -66,13 +65,12 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 .all()
                 .stream()
                 .toList();
-        List<CustomerImpact> customers = neo4jClient.query("""
+        List<CustomerImpact> customers = query("""
                 MATCH (:REVISION {revisionId: $revisionId})<-[:HAS_REVISION]-(p:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)<-[:PLACED]-(c:CUSTOMER)
                 WHERE coalesce(so.openQuantity, 0) > 0
                 RETURN DISTINCT c.customerId AS customerId, c.customerName AS customerName, so.salesOrderId AS salesOrderId
                 ORDER BY c.customerId, so.salesOrderId
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(CustomerImpact.class)
                 .mappedBy((typeSystem, record) -> new CustomerImpact(
                         nullableString(record, "customerId"),
@@ -110,13 +108,12 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
         if (componentIds.isEmpty()) {
             return List.of();
         }
-        return neo4jClient.query("""
+        return query("""
                 MATCH (i:INVENTORY)-[:STOCKS]->(c:COMPONENT)
                 WHERE c.componentId IN $componentIds
                 RETURN c.componentId AS componentId, i.warehouse AS warehouse, i.quantity AS quantity
                 ORDER BY c.componentId, i.warehouse
-                """)
-                .bindAll(Map.of("componentIds", componentIds))
+                """, Map.of("componentIds", componentIds))
                 .fetchAs(InventoryImpact.class)
                 .mappedBy((typeSystem, record) -> new InventoryImpact(
                         nullableString(record, "componentId"),
@@ -131,13 +128,12 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
         if (componentIds.isEmpty()) {
             return List.of();
         }
-        return neo4jClient.query("""
+        return query("""
                 MATCH (po:PURCHASE_ORDER)-[:PURCHASES]->(c:COMPONENT)
                 WHERE c.componentId IN $componentIds AND coalesce(po.openQuantity, 0) > 0
                 RETURN po.purchaseOrderId AS purchaseOrderId, c.componentId AS componentId, po.openQuantity AS openQuantity
                 ORDER BY po.purchaseOrderId
-                """)
-                .bindAll(Map.of("componentIds", componentIds))
+                """, Map.of("componentIds", componentIds))
                 .fetchAs(ProcurementImpact.class)
                 .mappedBy((typeSystem, record) -> new ProcurementImpact(
                         nullableString(record, "purchaseOrderId"),
@@ -149,12 +145,11 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
     }
 
     private BigDecimal revenueForRevision(Map<String, Object> params) {
-        return neo4jClient.query("""
+        return query("""
                 MATCH (:REVISION {revisionId: $revisionId})<-[:HAS_REVISION]-(:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)
                 WHERE coalesce(so.openQuantity, 0) > 0
                 RETURN coalesce(sum(so.orderValue), 0) AS revenue
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(BigDecimal.class)
                 .mappedBy((typeSystem, record) -> nullableDecimal(record, "revenue"))
                 .one()
@@ -162,12 +157,11 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
     }
 
     private long salesOrderCountForRevision(Map<String, Object> params) {
-        return neo4jClient.query("""
+        return query("""
                 MATCH (:REVISION {revisionId: $revisionId})<-[:HAS_REVISION]-(:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)
                 WHERE coalesce(so.openQuantity, 0) > 0
                 RETURN count(DISTINCT so) AS count
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(Long.class)
                 .mappedBy((typeSystem, record) -> nullableLong(record, "count"))
                 .one()
@@ -175,12 +169,11 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
     }
 
     private long activeWorkOrderCountForRevision(Map<String, Object> params) {
-        return neo4jClient.query("""
+        return query("""
                 MATCH (wo:WORK_ORDER)-[:BUILDS]->(:REVISION {revisionId: $revisionId})
                 WHERE wo.status IN ['CREATED', 'RELEASED', 'IN_PROGRESS'] AND coalesce(wo.remainingQuantity, 0) > 0
                 RETURN count(DISTINCT wo) AS count
-                """)
-                .bindAll(params)
+                """, params)
                 .fetchAs(Long.class)
                 .mappedBy((typeSystem, record) -> nullableLong(record, "count"))
                 .one()
