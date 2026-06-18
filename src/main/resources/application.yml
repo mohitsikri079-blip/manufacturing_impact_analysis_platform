@@ -1,0 +1,42 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: manufacturing-impact-analysis-engine
+  neo4j:
+    uri: ${NEO4J_URI:neo4j://127.0.0.1:7687}
+    authentication:
+      username: ${NEO4J_USERNAME:neo4j}
+      password: ${NEO4J_PASSWORD:password}
+
+miae:
+  security:
+    api-key: ${MIAE_API_KEY:dev-api-key}
+    enabled: ${MIAE_API_KEY_ENABLED:true}
+  sample-data:
+    enabled: ${MIAE_SAMPLE_DATA_ENABLED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+copilot:
+  enabled: ${COPILOT_ENABLED:false}
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    model: ${OPENAI_MODEL:gpt-5.2}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+  impact-engine:
+    base-url: ${IMPACT_ENGINE_BASE_URL:http://localhost:8080}
+    api-key: ${IMPACT_ENGINE_API_KEY:${MIAE_API_KEY:dev-api-key}}
