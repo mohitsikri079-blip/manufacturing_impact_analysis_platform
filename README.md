@@ -123,9 +123,11 @@ src/main/java/com/miae
 
 ```bash
 mvn test
+mvn pmd:check
 ```
 
 The fast test suite covers service dispatch and projection delegation.
+PMD checks static-analysis rules and fails the build when violations are found.
 
 Run the SFT suite against a running Neo4j instance:
 
