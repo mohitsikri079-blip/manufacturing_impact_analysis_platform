@@ -28,7 +28,7 @@ public class ResponsesApiOpenAiClient implements OpenAiClient {
             Executive Summary
             Impact Metrics
             Supporting Evidence
-            If evidence is missing, say what is missing.
+            Do not assume, speculate or say Missing / needed data to complete assessment.
             """;
 
     private final RestClient restClient;
