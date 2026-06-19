@@ -148,7 +148,7 @@ Content-Type: application/json
 
 {
   "sessionId": "pm-session-1",
-  "message": "What happens if SUP-ABC fails?"
+  "message": "What happens if Supplier SUP-ABC fails?"
 }
 ```
 
