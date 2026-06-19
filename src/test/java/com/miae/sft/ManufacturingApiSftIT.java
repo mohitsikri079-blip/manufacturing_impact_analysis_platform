@@ -20,6 +20,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+/*
+ * Integration tests for the MIAE API(non copilot) in the SFT profile. These tests cover end-to-end scenarios including:
+ * - Pre-Requirite: Ensure Neo4j is running and accessible at the configured URI before executing these tests.
+ * - Ingesting manufacturing data through the API and verifying the resulting graph structure in Neo4j.
+ * - Performing impact analysis on revisions, components, and suppliers and validating the response structure and content.
+ * - Ensuring that API key authentication is enforced for all endpoints.
+ */
 @SpringBootTest(classes = MiaeApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("sft")
 @TestPropertySource(properties = {
@@ -112,7 +119,7 @@ class ManufacturingApiSftIT {
     void apiKeyIsRequiredForApiRequests() {
         ResponseEntity<String> response = restTemplate.exchange(
                 url("/api/v1/products"),
-                HttpMethod.POST,
+                HttpMethod.OPTIONS,
                 new HttpEntity<>("""
                         {"productId":"P100","code":"SENSOR-100","name":"Industrial Sensor"}
                         """, jsonHeadersWithoutApiKey()),

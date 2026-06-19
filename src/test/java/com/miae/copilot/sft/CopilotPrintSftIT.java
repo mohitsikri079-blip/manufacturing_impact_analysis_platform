@@ -23,6 +23,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
+/*
+ * Integration tests for the Copilot Chat API in the SFT profile. These tests cover end-to-end scenarios including:
+ * - Pre-Requirite: Ensure you've a valid OpenAI API key set in the environment variables.
+ * - Initiating impact conversation with the Copilot Chat API and verifying the response structure and content.
+ * - Ensuring that API key authentication is enforced for all endpoints.
+ */
 @SpringBootTest(classes = MiaeApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(CopilotPrintSftIT.PrintSftConfig.class)
 @TestPropertySource(properties = {
