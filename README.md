@@ -151,6 +151,10 @@ Content-Type: application/json
   "message": "What happens if Supplier SUP-ABC fails?"
 }
 ```
+Access the copilot UI:
+```http
+http://localhost:8080/copilot.html
+```
 
 Configure OpenAI through environment variables. Do not hardcode API keys.
 
