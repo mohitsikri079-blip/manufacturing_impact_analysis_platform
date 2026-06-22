@@ -1,8 +1,11 @@
 # Manufacturing Impact Analysis Engine
 
-Manufacturing Impact Analysis Engine (MIAE) is a Spring Boot + Neo4j MVP that builds a manufacturing knowledge graph from ERP-style events and exposes deterministic impact analysis APIs for revisions, components, and suppliers.
+Manufacturing Impact Analysis Engine (MIAE) is a Spring Boot + Neo4j MVP that builds a manufacturing knowledge graph from ERP-style events and exposes deterministic impact analysis APIs for revisions, components, and suppliers. The Manufacturing Impact Analysis Platform provides instant visibility into upstream and downstream dependencies using a graph-based model and a natural language copilot.
 
 Detailed requirements, architecture, and design documentation for the Manufacturing Impact Analysis Engine (MIAE) can be found within this repository.
+
+## Problem:
+Today, impact analysis is often a manual process involving multiple teams and systems. Manufacturing organizations struggle to understand the downstream impact of engineering changes, since there are multiple disconnected business systems like ERP, PLM, Inventory, Supplier etc. Without timely impact visibility, production planning slows, procurement cannot respond proactively, customer commitments become uncertain, and overall business risk increases. If a component becomes unavailable or a revision changes, teams need to quickly understand affected products, work orders, suppliers, inventory, and customer orders.
 
 ## Stack
 
