@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manufacturing Impact Copilot</title>
+    <link rel="stylesheet" href="copilot.css">
+</head>
+<body>
+    <main class="chat-shell" aria-label="Manufacturing Impact Copilot">
+        <section class="chat-panel">
+            <header class="chat-header">
+                <div>
+                    <p class="eyebrow">Manufacturing Impact Copilot</p>
+                    <h1>Impact analysis chat</h1>
+                </div>
+                <label class="api-key-field">
+                    <span>API key</span>
+                    <input id="apiKey" type="password" autocomplete="off" value="dev-api-key">
+                </label>
+            </header>
+
+            <div class="examples" aria-label="Example queries">
+                <button type="button" data-example="What happens if Supplier SUP-ABC fails?">Supplier impact</button>
+                <button type="button" data-example="What happens if component PCB-B becomes obsolete?">Component obsolete</button>
+                <button type="button" data-example="What is the impact of revision P100-REV-B?">Revision impact</button>
+            </div>
+
+            <section id="messages" class="messages" aria-live="polite">
+                <article class="message assistant">
+                    <div class="bubble">
+                        Ask about a supplier, component, or revision using its ID.
+                    </div>
+                </article>
+            </section>
+
+            <form id="chatForm" class="composer">
+                <label class="visually-hidden" for="messageInput">Message</label>
+                <textarea id="messageInput" rows="1" placeholder="Ask an impact question..." required></textarea>
+                <button id="sendButton" type="submit">Send</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="copilot.js"></script>
+</body>
+</html>
