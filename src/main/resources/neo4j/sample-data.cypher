@@ -12,9 +12,12 @@ SET revB.code = 'B',
     revB.status = 'APPROVED',
     revB.productId = 'P100';
 
-MERGE (pcbA:COMPONENT {componentId: 'PCB-A'});
-MERGE (pcbB:COMPONENT {componentId: 'PCB-B'});
-MERGE (screw:COMPONENT {componentId: 'SCREW'});
+MERGE (pcbA:COMPONENT {componentId: 'PCB-A'})
+SET pcbA.uom = 'Pcs';
+MERGE (pcbB:COMPONENT {componentId: 'PCB-B'})
+SET pcbB.uom = 'Pcs';
+MERGE (screw:COMPONENT {componentId: 'SCREW'})
+SET screw.uom = 'Pcs';
 
 MERGE (supplier:SUPPLIER {supplierId: 'SUP-ABC'})
 SET supplier.supplierName = 'ABC Electronics';
@@ -29,19 +32,23 @@ SET invB.warehouse = 'WH1',
 
 MERGE (po:PURCHASE_ORDER {purchaseOrderId: 'PO-100'})
 SET po.openQuantity = 1000,
-    po.supplierId = 'SUP-ABC';
+    po.supplierId = 'SUP-ABC',
+    po.expectedDeliveryDate = date('2026-02-10');
 
 MERGE (wo:WORK_ORDER {workOrderId: 'WO-1001'})
 SET wo.status = 'RELEASED',
     wo.remainingQuantity = 50,
     wo.priority = 'HIGH',
-    wo.plannedCompletionDate = date('2026-02-20');
+    wo.plannedCompletionDate = date('2026-02-20'),
+    wo.uom = 'Box',
+    wo.materialAvailabilityStatus = 'READY';
 
 MERGE (so:SALES_ORDER {salesOrderId: 'SO-100'})
 SET so.openQuantity = 25,
     so.orderValue = 50000.0,
     so.priority = 'CRITICAL',
-    so.productId = 'P100';
+    so.productId = 'P100',
+    so.currency = 'USD';
 
 MERGE (customer:CUSTOMER {customerId: 'CUST-100'})
 SET customer.customerName = 'Acme Corp';

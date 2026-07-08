@@ -1,4 +1,4 @@
 package com.miae.api.dto.impact;
 
-public record InventoryImpact(String componentId, String warehouse, long quantity) {
+public record InventoryImpact(String componentId, String warehouse, long quantity, String uom) {
 }

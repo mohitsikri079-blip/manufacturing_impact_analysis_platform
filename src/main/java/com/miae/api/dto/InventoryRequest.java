@@ -13,6 +13,7 @@ public record InventoryRequest(
         @NotBlank String componentId,
         @NotBlank String warehouse,
         @NotNull @PositiveOrZero Long quantity,
-        @NotBlank String inventoryId
+        @NotBlank String inventoryId,
+        String uom
 ) {
 }

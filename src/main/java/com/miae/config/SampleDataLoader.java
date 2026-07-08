@@ -14,6 +14,7 @@ import com.miae.service.OrderProjectionService;
 import com.miae.service.ProductProjectionService;
 import com.miae.service.RevisionProjectionService;
 import com.miae.service.SupplierProjectionService;
+import com.miae.validation.MaterialAvailabilityStatus;
 import com.miae.validation.Priority;
 import com.miae.validation.WorkOrderStatus;
 import java.math.BigDecimal;
@@ -68,25 +69,27 @@ public class SampleDataLoader implements ApplicationRunner {
         revisionService.upsert(new RevisionRequest("P100-REV-A", "P100", "A", "APPROVED"));
         revisionService.upsert(new RevisionRequest("P100-REV-B", "P100", "B", "APPROVED"));
         bomService.upsert(new BomRequest("P100-REV-A", List.of(
-                new BomRequest.BomComponentRequest("PCB-A", 1L),
-                new BomRequest.BomComponentRequest("SCREW", 4L))));
+                new BomRequest.BomComponentRequest("PCB-A", 1L, "Pcs"),
+                new BomRequest.BomComponentRequest("SCREW", 4L, "Pcs"))));
         bomService.upsert(new BomRequest("P100-REV-B", List.of(
-                new BomRequest.BomComponentRequest("PCB-B", 1L),
-                new BomRequest.BomComponentRequest("SCREW", 4L))));
+                new BomRequest.BomComponentRequest("PCB-B", 1L, "Pcs"),
+                new BomRequest.BomComponentRequest("SCREW", 4L, "Pcs"))));
         supplierService.upsert(new SupplierMappingRequest("PCB-A", List.of(
                 new SupplierMappingRequest.SupplierRequest("SUP-ABC", "ABC Electronics", 15))));
         supplierService.upsert(new SupplierMappingRequest("PCB-B", List.of(
                 new SupplierMappingRequest.SupplierRequest("SUP-ABC", "ABC Electronics", 15))));
-        inventoryService.upsert(new InventoryRequest("PCB-A", "WH1", 500L, "INV-PCBA-WH1"));
-        inventoryService.upsert(new InventoryRequest("PCB-B", "WH1", 250L, "INV-PCBB-WH1"));
-        orderService.upsertPurchaseOrder(new PurchaseOrderRequest("PO-100", "SUP-ABC", "PCB-A", 1000L));
+        inventoryService.upsert(new InventoryRequest("PCB-A", "WH1", 500L, "INV-PCBA-WH1", "Pcs"));
+        inventoryService.upsert(new InventoryRequest("PCB-B", "WH1", 250L, "INV-PCBB-WH1", "Pcs"));
+        orderService.upsertPurchaseOrder(new PurchaseOrderRequest("PO-100", "SUP-ABC", "PCB-A", 1000L, "Pcs", LocalDate.of(2026, 2, 10)));
         orderService.upsertWorkOrder(new WorkOrderRequest(
                 "WO-1001",
                 "P100-REV-B",
                 WorkOrderStatus.RELEASED,
                 50L,
                 Priority.HIGH,
-                LocalDate.of(2026, 2, 20)));
+                LocalDate.of(2026, 2, 20),
+                "Box",
+                MaterialAvailabilityStatus.READY));
         orderService.upsertSalesOrder(new SalesOrderRequest(
                 "SO-100",
                 "CUST-100",
@@ -94,7 +97,8 @@ public class SampleDataLoader implements ApplicationRunner {
                 "P100",
                 25L,
                 BigDecimal.valueOf(50000),
-                Priority.CRITICAL));
+                Priority.CRITICAL,
+                "USD"));
         LOGGER.info("Sample manufacturing graph data loaded");
     }
 }

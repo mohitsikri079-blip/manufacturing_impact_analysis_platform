@@ -52,14 +52,15 @@ public class ComponentImpactStrategy extends Neo4jAnalysisSupport implements Imp
 
         List<InventoryImpact> inventory = query("""
                 MATCH (i:INVENTORY)-[:STOCKS]->(c:COMPONENT {componentId: $componentId})
-                RETURN c.componentId AS componentId, i.warehouse AS warehouse, i.quantity AS quantity
+                RETURN c.componentId AS componentId, i.warehouse AS warehouse, i.quantity AS quantity, c.uom AS uom
                 ORDER BY i.warehouse
                 """, params)
                 .fetchAs(InventoryImpact.class)
                 .mappedBy((typeSystem, record) -> new InventoryImpact(
                         nullableString(record, "componentId"),
                         nullableString(record, "warehouse"),
-                        nullableLong(record, "quantity")))
+                        nullableLong(record, "quantity"),
+                        nullableString(record, "uom")))
                 .all()
                 .stream()
                 .toList();
@@ -80,14 +81,20 @@ public class ComponentImpactStrategy extends Neo4jAnalysisSupport implements Imp
         List<ProcurementImpact> purchaseOrders = query("""
                 MATCH (po:PURCHASE_ORDER)-[:PURCHASES]->(c:COMPONENT {componentId: $componentId})
                 WHERE coalesce(po.openQuantity, 0) > 0
-                RETURN po.purchaseOrderId AS purchaseOrderId, c.componentId AS componentId, po.openQuantity AS openQuantity
+                RETURN po.purchaseOrderId AS purchaseOrderId,
+                       c.componentId AS componentId,
+                       po.openQuantity AS openQuantity,
+                       c.uom AS uom,
+                       po.expectedDeliveryDate AS expectedDeliveryDate
                 ORDER BY po.purchaseOrderId
                 """, params)
                 .fetchAs(ProcurementImpact.class)
                 .mappedBy((typeSystem, record) -> new ProcurementImpact(
                         nullableString(record, "purchaseOrderId"),
                         nullableString(record, "componentId"),
-                        nullableLong(record, "openQuantity")))
+                        nullableLong(record, "openQuantity"),
+                        nullableString(record, "uom"),
+                        nullableLocalDate(record, "expectedDeliveryDate")))
                 .all()
                 .stream()
                 .toList();
@@ -95,14 +102,20 @@ public class ComponentImpactStrategy extends Neo4jAnalysisSupport implements Imp
         List<ManufacturingImpact> workOrders = query("""
                 MATCH (wo:WORK_ORDER)-[:BUILDS]->(:REVISION)-[:USES_COMPONENT]->(:COMPONENT {componentId: $componentId})
                 WHERE wo.status IN ['CREATED', 'RELEASED', 'IN_PROGRESS']
-                RETURN DISTINCT wo.workOrderId AS workOrderId, wo.status AS status, wo.remainingQuantity AS remainingQty
+                RETURN DISTINCT wo.workOrderId AS workOrderId,
+                       wo.status AS status,
+                       wo.remainingQuantity AS remainingQty,
+                       wo.uom AS uom,
+                       wo.materialAvailabilityStatus AS materialAvailabilityStatus
                 ORDER BY wo.workOrderId
                 """, params)
                 .fetchAs(ManufacturingImpact.class)
                 .mappedBy((typeSystem, record) -> new ManufacturingImpact(
                         nullableString(record, "workOrderId"),
                         nullableString(record, "status"),
-                        nullableLong(record, "remainingQty")))
+                        nullableLong(record, "remainingQty"),
+                        nullableString(record, "uom"),
+                        nullableString(record, "materialAvailabilityStatus")))
                 .all()
                 .stream()
                 .toList();

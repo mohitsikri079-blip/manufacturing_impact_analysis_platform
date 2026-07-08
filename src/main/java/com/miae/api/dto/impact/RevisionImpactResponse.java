@@ -22,7 +22,8 @@ public record RevisionImpactResponse(
             long affectedWorkOrders,
             long affectedSalesOrders,
             long affectedCustomers,
-            BigDecimal revenueAtRisk
+            BigDecimal revenueAtRisk,
+            String revenueCurrency
     ) {
     }
 

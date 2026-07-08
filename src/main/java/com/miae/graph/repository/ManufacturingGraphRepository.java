@@ -57,13 +57,15 @@ public class ManufacturingGraphRepository {
             neo4jClient.query("""
                     MERGE (r:REVISION {revisionId: $revisionId})
                     MERGE (c:COMPONENT {componentId: $componentId})
+                    SET c.uom = CASE WHEN $uom = '' THEN c.uom ELSE $uom END
                     MERGE (r)-[rel:USES_COMPONENT]->(c)
                     SET rel.quantity = $quantity
                     """)
                     .bindAll(Map.of(
                             "revisionId", request.revisionId(),
                             "componentId", component.componentId(),
-                            "quantity", component.quantity()))
+                            "quantity", component.quantity(),
+                            "uom", blankToEmpty(component.uom())))
                     .run();
         }
     }
@@ -91,13 +93,15 @@ public class ManufacturingGraphRepository {
                 MERGE (c:COMPONENT {componentId: $componentId})
                 MERGE (i:INVENTORY {inventoryId: $inventoryId})
                 SET i.warehouse = $warehouse, i.quantity = $quantity
+                SET c.uom = CASE WHEN $uom = '' THEN c.uom ELSE $uom END
                 MERGE (i)-[:STOCKS]->(c)
                 """)
                 .bindAll(Map.of(
                         "componentId", request.componentId(),
                         "inventoryId", request.inventoryId(),
                         "warehouse", request.warehouse(),
-                        "quantity", request.quantity()))
+                        "quantity", request.quantity(),
+                        "uom", blankToEmpty(request.uom())))
                 .run();
     }
 
@@ -106,7 +110,10 @@ public class ManufacturingGraphRepository {
                 MERGE (c:COMPONENT {componentId: $componentId})
                 MERGE (s:SUPPLIER {supplierId: $supplierId})
                 MERGE (po:PURCHASE_ORDER {purchaseOrderId: $purchaseOrderId})
-                SET po.openQuantity = $openQuantity, po.supplierId = $supplierId
+                SET po.openQuantity = $openQuantity,
+                    po.supplierId = $supplierId,
+                    po.expectedDeliveryDate = CASE WHEN $expectedDeliveryDate = '' THEN po.expectedDeliveryDate ELSE date($expectedDeliveryDate) END
+                SET c.uom = CASE WHEN $uom = '' THEN c.uom ELSE $uom END
                 MERGE (po)-[:PURCHASES]->(c)
                 MERGE (c)-[:SUPPLIED_BY]->(s)
                 """)
@@ -114,7 +121,9 @@ public class ManufacturingGraphRepository {
                         "componentId", request.componentId(),
                         "supplierId", request.supplierId(),
                         "purchaseOrderId", request.purchaseOrderId(),
-                        "openQuantity", request.openQuantity()))
+                        "openQuantity", request.openQuantity(),
+                        "uom", blankToEmpty(request.uom()),
+                        "expectedDeliveryDate", request.expectedDeliveryDate() == null ? "" : request.expectedDeliveryDate().toString()))
                 .run();
     }
 
@@ -125,7 +134,9 @@ public class ManufacturingGraphRepository {
                 SET wo.status = $status,
                     wo.remainingQuantity = $remainingQuantity,
                     wo.priority = $priority,
-                    wo.plannedCompletionDate = date($plannedCompletionDate)
+                    wo.plannedCompletionDate = date($plannedCompletionDate),
+                    wo.uom = CASE WHEN $uom = '' THEN wo.uom ELSE $uom END,
+                    wo.materialAvailabilityStatus = CASE WHEN $materialAvailabilityStatus = '' THEN wo.materialAvailabilityStatus ELSE $materialAvailabilityStatus END
                 MERGE (wo)-[:BUILDS]->(r)
                 """)
                 .bindAll(Map.of(
@@ -134,7 +145,9 @@ public class ManufacturingGraphRepository {
                         "status", request.status().name(),
                         "remainingQuantity", request.remainingQty(),
                         "priority", request.priority().name(),
-                        "plannedCompletionDate", request.plannedCompletionDate().toString()))
+                        "plannedCompletionDate", request.plannedCompletionDate().toString(),
+                        "uom", blankToEmpty(request.uom()),
+                        "materialAvailabilityStatus", request.materialAvailabilityStatus() == null ? "" : request.materialAvailabilityStatus().name()))
                 .run();
     }
 
@@ -147,7 +160,8 @@ public class ManufacturingGraphRepository {
                 SET so.openQuantity = $openQuantity,
                     so.orderValue = $orderValue,
                     so.priority = $priority,
-                    so.productId = $productId
+                    so.productId = $productId,
+                    so.currency = CASE WHEN $currency = '' THEN so.currency ELSE $currency END
                 MERGE (so)-[:ORDERS]->(p)
                 MERGE (c)-[:PLACED]->(so)
                 """)
@@ -158,7 +172,12 @@ public class ManufacturingGraphRepository {
                         "salesOrderId", request.salesOrderId(),
                         "openQuantity", request.openQuantity(),
                         "orderValue", request.orderValue().doubleValue(),
-                        "priority", request.priority().name()))
+                        "priority", request.priority().name(),
+                        "currency", blankToEmpty(request.currency())))
                 .run();
+    }
+
+    private String blankToEmpty(String value) {
+        return value == null || value.isBlank() ? "" : value;
     }
 }

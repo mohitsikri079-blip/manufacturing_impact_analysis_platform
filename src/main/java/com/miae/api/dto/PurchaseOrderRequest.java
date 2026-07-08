@@ -1,8 +1,10 @@
 package com.miae.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
 
 /**
  * Data transfer object for creating or updating a purchase order. This DTO contains the purchase order ID, supplier ID, component ID, and open quantity for the purchase order.
@@ -14,6 +16,8 @@ public record PurchaseOrderRequest(
         @NotBlank String purchaseOrderId,
         @NotBlank String supplierId,
         @NotBlank String componentId,
-        @NotNull @PositiveOrZero Long openQuantity
+        @NotNull @PositiveOrZero Long openQuantity,
+        String uom,
+        @JsonFormat(pattern = "dd/MM/yyyy") LocalDate expectedDeliveryDate
 ) {
 }

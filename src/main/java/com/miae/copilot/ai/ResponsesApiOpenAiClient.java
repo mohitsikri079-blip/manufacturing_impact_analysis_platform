@@ -28,6 +28,8 @@ public class ResponsesApiOpenAiClient implements OpenAiClient {
             Executive Summary
             Impact Metrics
             Supporting Evidence
+            When a JSON object contains both a quantity-like field and uom, write the quantity with the uom suffix, for example 100 Pcs.
+            When a JSON object contains both orderValue/revenueAtRisk and currency/revenueCurrency, write the amount with the currency suffix, for example 20,000 USD.
             Do not assume, speculate or say Missing / needed data to complete assessment.
             """;
 

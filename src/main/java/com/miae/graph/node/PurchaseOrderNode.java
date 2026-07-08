@@ -1,5 +1,6 @@
 package com.miae.graph.node;
 
+import java.time.LocalDate;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
@@ -13,14 +14,16 @@ public class PurchaseOrderNode {
     private String purchaseOrderId;
     private long openQuantity;
     private String supplierId;
+    private LocalDate expectedDeliveryDate;
 
     public PurchaseOrderNode() {
     }
 
-    public PurchaseOrderNode(String purchaseOrderId, long openQuantity, String supplierId) {
+    public PurchaseOrderNode(String purchaseOrderId, long openQuantity, String supplierId, LocalDate expectedDeliveryDate) {
         this.purchaseOrderId = purchaseOrderId;
         this.openQuantity = openQuantity;
         this.supplierId = supplierId;
+        this.expectedDeliveryDate = expectedDeliveryDate;
     }
 
     public String getPurchaseOrderId() {
@@ -33,5 +36,9 @@ public class PurchaseOrderNode {
 
     public String getSupplierId() {
         return supplierId;
+    }
+
+    public LocalDate getExpectedDeliveryDate() {
+        return expectedDeliveryDate;
     }
 }

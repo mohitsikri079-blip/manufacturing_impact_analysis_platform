@@ -116,23 +116,24 @@ class CopilotPrintSftIT {
                     summary.put("affectedSalesOrders", 1);
                     summary.put("affectedCustomers", 1);
                     summary.put("revenueAtRisk", 50000);
+                    summary.put("revenueCurrency", "USD");
 
                     Map<String, Object> response = new LinkedHashMap<>();
                     response.put("entityType", ImpactEntityType.SUPPLIER.name());
                     response.put("entityId", supplierId);
                     response.put("summary", summary);
                     response.put("components", new Object[]{
-                            Map.of("componentId", "PCB-A"),
-                            Map.of("componentId", "PCB-B")
+                            Map.of("componentId", "PCB-A", "uom", "Pcs"),
+                            Map.of("componentId", "PCB-B", "uom", "Pcs")
                     });
                     response.put("affectedProducts", new Object[]{
                             Map.of("productId", "P100", "productName", "Industrial Sensor")
                     });
                     response.put("affectedWorkOrders", new Object[]{
-                            Map.of("workOrderId", "WO-1001", "remainingQty", 50)
+                            Map.of("workOrderId", "WO-1001", "remainingQty", 50, "uom", "Box")
                     });
                     response.put("affectedSalesOrders", new Object[]{
-                            Map.of("salesOrderId", "SO-100", "orderValue", 50000)
+                            Map.of("salesOrderId", "SO-100", "orderValue", 50000, "currency", "USD")
                     });
                     response.put("affectedCustomers", new Object[]{
                             Map.of("customerId", "CUST-100", "customerName", "Acme Corp")
@@ -192,19 +193,19 @@ class CopilotPrintSftIT {
                             Map.of("productId", productId, "productName", productName, "revisionId", productId + "-REV-A")
                     });
                     response.put("inventory", new Object[]{
-                            Map.of("componentId", componentId, "warehouse", "WH-1", "quantity", 100)
+                            Map.of("componentId", componentId, "warehouse", "WH-1", "quantity", 100, "uom", "Pcs")
                     });
                     response.put("suppliers", new Object[]{
                             Map.of("supplierId", supplierId, "supplierName", supplierName)
                     });
                     response.put("purchaseOrders", new Object[]{
-                            Map.of("purchaseOrderId", "PO-" + componentId.substring(componentId.length() - 1), "componentId", componentId, "openQuantity", 250)
+                            Map.of("purchaseOrderId", "PO-" + componentId.substring(componentId.length() - 1), "componentId", componentId, "openQuantity", 250, "uom", "Pcs", "expectedDeliveryDate", "2026-02-10")
                     });
                     response.put("affectedWorkOrders", new Object[]{
-                            Map.of("workOrderId", workOrderId, "remainingQty", 50)
+                            Map.of("workOrderId", workOrderId, "remainingQty", 50, "uom", "Box")
                     });
                     response.put("affectedSalesOrders", new Object[]{
-                            Map.of("salesOrderId", salesOrderId, "orderValue", orderValue)
+                            Map.of("salesOrderId", salesOrderId, "orderValue", orderValue, "currency", "USD")
                     });
                     response.put("affectedCustomers", new Object[]{
                             Map.of("customerId", customerId, "customerName", customerName)

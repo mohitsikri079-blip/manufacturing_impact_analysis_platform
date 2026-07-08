@@ -16,16 +16,26 @@ public class WorkOrderNode {
     private long remainingQuantity;
     private LocalDate plannedCompletionDate;
     private String priority;
+    private String uom;
+    private String materialAvailabilityStatus;
 
     public WorkOrderNode() {
     }
 
-    public WorkOrderNode(String workOrderId, String status, long remainingQuantity, LocalDate plannedCompletionDate, String priority) {
+    public WorkOrderNode(String workOrderId,
+                         String status,
+                         long remainingQuantity,
+                         LocalDate plannedCompletionDate,
+                         String priority,
+                         String uom,
+                         String materialAvailabilityStatus) {
         this.workOrderId = workOrderId;
         this.status = status;
         this.remainingQuantity = remainingQuantity;
         this.plannedCompletionDate = plannedCompletionDate;
         this.priority = priority;
+        this.uom = uom;
+        this.materialAvailabilityStatus = materialAvailabilityStatus;
     }
 
     public String getWorkOrderId() {
@@ -46,5 +56,13 @@ public class WorkOrderNode {
 
     public String getPriority() {
         return priority;
+    }
+
+    public String getUom() {
+        return uom;
+    }
+
+    public String getMaterialAvailabilityStatus() {
+        return materialAvailabilityStatus;
     }
 }

@@ -54,14 +54,20 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
         List<ProcurementImpact> purchaseOrders = purchaseOrdersForComponents(obsoleteOrCurrentComponents);
         List<ManufacturingImpact> workOrders = query("""
                 MATCH (wo:WORK_ORDER)-[:BUILDS]->(:REVISION {revisionId: $revisionId})
-                RETURN wo.workOrderId AS workOrderId, wo.status AS status, wo.remainingQuantity AS remainingQty
+                RETURN wo.workOrderId AS workOrderId,
+                       wo.status AS status,
+                       wo.remainingQuantity AS remainingQty,
+                       wo.uom AS uom,
+                       wo.materialAvailabilityStatus AS materialAvailabilityStatus
                 ORDER BY wo.priority DESC, wo.workOrderId
                 """, params)
                 .fetchAs(ManufacturingImpact.class)
                 .mappedBy((typeSystem, record) -> new ManufacturingImpact(
                         nullableString(record, "workOrderId"),
                         nullableString(record, "status"),
-                        nullableLong(record, "remainingQty")))
+                        nullableLong(record, "remainingQty"),
+                        nullableString(record, "uom"),
+                        nullableString(record, "materialAvailabilityStatus")))
                 .all()
                 .stream()
                 .toList();
@@ -80,6 +86,7 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 .stream()
                 .toList();
         BigDecimal revenueAtRisk = revenueForRevision(params);
+        String revenueCurrency = currencyForRevision(params);
         long salesOrderCount = salesOrderCountForRevision(params);
         long blockingWorkOrders = activeWorkOrderCountForRevision(params);
         long blockingSalesOrders = salesOrderCount;
@@ -91,7 +98,8 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 workOrders.size(),
                 salesOrderCount,
                 customers.stream().map(CustomerImpact::customerId).distinct().count(),
-                revenueAtRisk);
+                revenueAtRisk,
+                revenueCurrency);
         return new RevisionImpactResponse(
                 ImpactEntityType.REVISION,
                 revisionId,
@@ -111,14 +119,15 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
         return query("""
                 MATCH (i:INVENTORY)-[:STOCKS]->(c:COMPONENT)
                 WHERE c.componentId IN $componentIds
-                RETURN c.componentId AS componentId, i.warehouse AS warehouse, i.quantity AS quantity
+                RETURN c.componentId AS componentId, i.warehouse AS warehouse, i.quantity AS quantity, c.uom AS uom
                 ORDER BY c.componentId, i.warehouse
                 """, Map.of("componentIds", componentIds))
                 .fetchAs(InventoryImpact.class)
                 .mappedBy((typeSystem, record) -> new InventoryImpact(
                         nullableString(record, "componentId"),
                         nullableString(record, "warehouse"),
-                        nullableLong(record, "quantity")))
+                        nullableLong(record, "quantity"),
+                        nullableString(record, "uom")))
                 .all()
                 .stream()
                 .toList();
@@ -131,14 +140,20 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
         return query("""
                 MATCH (po:PURCHASE_ORDER)-[:PURCHASES]->(c:COMPONENT)
                 WHERE c.componentId IN $componentIds AND coalesce(po.openQuantity, 0) > 0
-                RETURN po.purchaseOrderId AS purchaseOrderId, c.componentId AS componentId, po.openQuantity AS openQuantity
+                RETURN po.purchaseOrderId AS purchaseOrderId,
+                       c.componentId AS componentId,
+                       po.openQuantity AS openQuantity,
+                       c.uom AS uom,
+                       po.expectedDeliveryDate AS expectedDeliveryDate
                 ORDER BY po.purchaseOrderId
                 """, Map.of("componentIds", componentIds))
                 .fetchAs(ProcurementImpact.class)
                 .mappedBy((typeSystem, record) -> new ProcurementImpact(
                         nullableString(record, "purchaseOrderId"),
                         nullableString(record, "componentId"),
-                        nullableLong(record, "openQuantity")))
+                        nullableLong(record, "openQuantity"),
+                        nullableString(record, "uom"),
+                        nullableLocalDate(record, "expectedDeliveryDate")))
                 .all()
                 .stream()
                 .toList();
@@ -166,6 +181,15 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 .mappedBy((typeSystem, record) -> nullableLong(record, "count"))
                 .one()
                 .orElse(0L);
+    }
+
+    private String currencyForRevision(Map<String, Object> params) {
+        List<String> currencies = stringList("""
+                MATCH (:REVISION {revisionId: $revisionId})<-[:HAS_REVISION]-(:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)
+                WHERE coalesce(so.openQuantity, 0) > 0
+                RETURN DISTINCT so.currency AS currency
+                """, params, "currency");
+        return currencies.size() == 1 ? currencies.getFirst() : null;
     }
 
     private long activeWorkOrderCountForRevision(Map<String, Object> params) {
