@@ -3,13 +3,16 @@ package com.miae.sft;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.miae.MiaeApplication;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +41,9 @@ import org.springframework.test.context.TestPropertySource;
 class ManufacturingApiSftIT {
 
     private static final String API_KEY = "dev-api-key";
+    private static final ParameterizedTypeReference<Map<String, Object>> MAP_RESPONSE =
+            new ParameterizedTypeReference<>() {
+            };
 
     @LocalServerPort
     private int port;
@@ -84,10 +90,10 @@ class ManufacturingApiSftIT {
     void impactAnalysisApisReturnRevisionComponentAndSupplierImpacts() {
         loadScenario();
 
-        ResponseEntity<Map> revision = post("/api/v1/impact-analysis", Map.of(
+        ResponseEntity<Map<String, Object>> revision = postMap("/api/v1/impact-analysis", Map.of(
                 "entityType", "REVISION",
                 "entityId", "P100-REV-B"
-        ), Map.class);
+        ));
         assertThat(revision.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(revision.getBody()).containsEntry("entityType", "REVISION");
         assertThat(map(revision, "summary")).containsEntry("affectedSalesOrders", 1);
@@ -95,24 +101,40 @@ class ManufacturingApiSftIT {
         assertThat(map(revision, "changeSummary")).containsKey("removedComponents");
         assertThat(map(revision, "lifecycleImpact")).containsEntry("canRetirePreviousRevision", false);
 
-        ResponseEntity<Map> component = post("/api/v1/impact-analysis", Map.of(
+        ResponseEntity<Map<String, Object>> component = postMap("/api/v1/impact-analysis", Map.of(
                 "entityType", "COMPONENT",
                 "entityId", "PCB-A"
-        ), Map.class);
+        ));
         assertThat(component.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(component.getBody()).containsEntry("entityType", "COMPONENT");
         assertThat(map(component, "summary")).containsEntry("usedByProducts", 1);
         assertThat(map(component, "summary")).containsEntry("affectedPurchaseOrders", 1);
+        assertThat(firstMap(component, "inventory")).containsEntry("uom", "Pcs");
+        assertThat(firstMap(component, "purchaseOrders")).containsEntry("uom", "Pcs");
+        assertThat(firstMap(component, "purchaseOrders")).containsEntry("expectedDeliveryDate", "2026-02-10");
 
-        ResponseEntity<Map> supplier = post("/api/v1/impact-analysis", Map.of(
+        ResponseEntity<Map<String, Object>> workOrderComponent = postMap("/api/v1/impact-analysis", Map.of(
+                "entityType", "COMPONENT",
+                "entityId", "PCB-B"
+        ));
+        assertThat(workOrderComponent.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(firstMap(workOrderComponent, "workOrders")).containsEntry("uom", "Box");
+        assertThat(firstMap(workOrderComponent, "workOrders")).containsEntry("materialAvailabilityStatus", "READY");
+
+        ResponseEntity<Map<String, Object>> supplier = postMap("/api/v1/impact-analysis", Map.of(
                 "entityType", "SUPPLIER",
                 "entityId", "SUP-ABC"
-        ), Map.class);
+        ));
         assertThat(supplier.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(supplier.getBody()).containsEntry("entityType", "SUPPLIER");
         assertThat(map(supplier, "summary")).containsEntry("suppliedComponents", 2);
         assertThat(map(supplier, "summary")).containsEntry("affectedCustomers", 1);
         assertThat(map(supplier, "summary")).containsEntry("revenueAtRisk", 50000.0);
+        assertThat(map(supplier, "summary")).containsEntry("revenueCurrency", "USD");
+        assertThat(firstMap(supplier, "components")).containsEntry("uom", "Pcs");
+        assertThat(firstMap(supplier, "affectedSalesOrders")).containsEntry("currency", "USD");
+        assertThat(firstMap(supplier, "affectedWorkOrders")).containsEntry("uom", "Box");
+        assertThat(firstMap(supplier, "affectedWorkOrders")).containsEntry("materialAvailabilityStatus", "READY");
     }
 
     @Test
@@ -149,15 +171,15 @@ class ManufacturingApiSftIT {
         postAccepted("/api/v1/boms", Map.of(
                 "revisionId", "P100-REV-A",
                 "components", new Object[]{
-                        Map.of("componentId", "PCB-A", "quantity", 1),
-                        Map.of("componentId", "SCREW", "quantity", 4)
+                        Map.of("componentId", "PCB-A", "quantity", 1, "uom", "Pcs"),
+                        Map.of("componentId", "SCREW", "quantity", 4, "uom", "Pcs")
                 }
         ));
         postAccepted("/api/v1/boms", Map.of(
                 "revisionId", "P100-REV-B",
                 "components", new Object[]{
-                        Map.of("componentId", "PCB-B", "quantity", 1),
-                        Map.of("componentId", "SCREW", "quantity", 4)
+                        Map.of("componentId", "PCB-B", "quantity", 1, "uom", "Pcs"),
+                        Map.of("componentId", "SCREW", "quantity", 4, "uom", "Pcs")
                 }
         ));
         postAccepted("/api/v1/suppliers", Map.of(
@@ -176,13 +198,16 @@ class ManufacturingApiSftIT {
                 "componentId", "PCB-A",
                 "warehouse", "WH1",
                 "quantity", 500,
-                "inventoryId", "INV-PCBA-WH1"
+                "inventoryId", "INV-PCBA-WH1",
+                "uom", "Pcs"
         ));
         postAccepted("/api/v1/purchase-orders", Map.of(
                 "purchaseOrderId", "PO-100",
                 "supplierId", "SUP-ABC",
                 "componentId", "PCB-A",
-                "openQuantity", 1000
+                "openQuantity", 1000,
+                "uom", "Pcs",
+                "expectedDeliveryDate", "10/02/2026"
         ));
         postAccepted("/api/v1/work-orders", Map.of(
                 "workOrderId", "WO-1001",
@@ -190,7 +215,9 @@ class ManufacturingApiSftIT {
                 "status", "RELEASED",
                 "remainingQty", 50,
                 "priority", "HIGH",
-                "plannedCompletionDate", "20/02/2026"
+                "plannedCompletionDate", "20/02/2026",
+                "uom", "Box",
+                "materialAvailabilityStatus", "READY"
         ));
         postAccepted("/api/v1/sales-orders", Map.of(
                 "salesOrderId", "SO-100",
@@ -199,20 +226,21 @@ class ManufacturingApiSftIT {
                 "productId", "P100",
                 "openQuantity", 25,
                 "orderValue", 50000,
-                "priority", "CRITICAL"
+                "priority", "CRITICAL",
+                "currency", "USD"
         ));
     }
 
     private void postAccepted(String path, Object body) {
-        ResponseEntity<Map> response = post(path, body, Map.class);
+        ResponseEntity<Map<String, Object>> response = postMap(path, body);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
     }
 
-    private <T> ResponseEntity<T> post(String path, Object body, Class<T> responseType) {
+    private ResponseEntity<Map<String, Object>> postMap(String path, Object body) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-API-Key", API_KEY);
-        return restTemplate.exchange(url(path), HttpMethod.POST, new HttpEntity<>(body, headers), responseType);
+        return restTemplate.exchange(url(path), HttpMethod.POST, new HttpEntity<>(body, headers), MAP_RESPONSE);
     }
 
     private HttpHeaders jsonHeadersWithoutApiKey() {
@@ -233,8 +261,21 @@ class ManufacturingApiSftIT {
                 .orElse(0L);
     }
 
+    private Map<String, Object> map(ResponseEntity<Map<String, Object>> response, String field) {
+        return asMap(body(response).get(field));
+    }
+
+    private Map<String, Object> firstMap(ResponseEntity<Map<String, Object>> response, String field) {
+        List<?> values = (List<?>) body(response).get(field);
+        return asMap(values.getFirst());
+    }
+
+    private Map<String, Object> body(ResponseEntity<Map<String, Object>> response) {
+        return Objects.requireNonNull(response.getBody());
+    }
+
     @SuppressWarnings("unchecked")
-    private Map<String, Object> map(ResponseEntity<Map> response, String field) {
-        return (Map<String, Object>) response.getBody().get(field);
+    private Map<String, Object> asMap(Object value) {
+        return (Map<String, Object>) value;
     }
 }

@@ -19,7 +19,8 @@ public record BomRequest(
 ) {
     public record BomComponentRequest(
             @NotBlank String componentId,
-            @NotNull @Positive Long quantity
+            @NotNull @Positive Long quantity,
+            String uom
     ) {
     }
 }

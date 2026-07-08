@@ -68,12 +68,13 @@ class CopilotServiceTest {
         summary.put("affectedSalesOrders", 1);
         summary.put("affectedCustomers", 1);
         summary.put("revenueAtRisk", 50000);
+        summary.put("revenueCurrency", "USD");
 
         Map<String, Object> impact = new LinkedHashMap<>();
         impact.put("entityType", "SUPPLIER");
         impact.put("entityId", "SUP-ABC");
         impact.put("summary", summary);
-        impact.put("components", new Object[]{Map.of("componentId", "PCB-A"), Map.of("componentId", "PCB-B")});
+        impact.put("components", new Object[]{Map.of("componentId", "PCB-A", "uom", "Pcs"), Map.of("componentId", "PCB-B", "uom", "Pcs")});
         impact.put("affectedCustomers", new Object[]{Map.of("customerId", "CUST-100", "customerName", "Acme Corp")});
         return impact;
     }

@@ -11,6 +11,7 @@ public class ComponentNode {
 
     @Id
     private String componentId;
+    private String uom;
 
     public ComponentNode() {
     }
@@ -19,7 +20,16 @@ public class ComponentNode {
         this.componentId = componentId;
     }
 
+    public ComponentNode(String componentId, String uom) {
+        this.componentId = componentId;
+        this.uom = uom;
+    }
+
     public String getComponentId() {
         return componentId;
+    }
+
+    public String getUom() {
+        return uom;
     }
 }

@@ -1,4 +1,4 @@
 package com.miae.api.dto.impact;
 
-public record ComponentImpactItem(String componentId) {
+public record ComponentImpactItem(String componentId, String uom) {
 }

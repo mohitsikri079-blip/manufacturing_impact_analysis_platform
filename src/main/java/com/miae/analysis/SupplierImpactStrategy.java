@@ -40,11 +40,13 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
 
         List<ComponentImpactItem> components = query("""
                 MATCH (c:COMPONENT)-[:SUPPLIED_BY]->(:SUPPLIER {supplierId: $supplierId})
-                RETURN DISTINCT c.componentId AS componentId
+                RETURN DISTINCT c.componentId AS componentId, c.uom AS uom
                 ORDER BY c.componentId
                 """, params)
                 .fetchAs(ComponentImpactItem.class)
-                .mappedBy((typeSystem, record) -> new ComponentImpactItem(nullableString(record, "componentId")))
+                .mappedBy((typeSystem, record) -> new ComponentImpactItem(
+                        nullableString(record, "componentId"),
+                        nullableString(record, "uom")))
                 .all()
                 .stream()
                 .toList();
@@ -65,14 +67,20 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
         List<ManufacturingImpact> workOrders = query("""
                 MATCH (wo:WORK_ORDER)-[:BUILDS]->(:REVISION)-[:USES_COMPONENT]->(:COMPONENT)-[:SUPPLIED_BY]->(:SUPPLIER {supplierId: $supplierId})
                 WHERE wo.status IN ['CREATED', 'RELEASED', 'IN_PROGRESS']
-                RETURN DISTINCT wo.workOrderId AS workOrderId, wo.status AS status, wo.remainingQuantity AS remainingQty
+                RETURN DISTINCT wo.workOrderId AS workOrderId,
+                       wo.status AS status,
+                       wo.remainingQuantity AS remainingQty,
+                       wo.uom AS uom,
+                       wo.materialAvailabilityStatus AS materialAvailabilityStatus
                 ORDER BY wo.workOrderId
                 """, params)
                 .fetchAs(ManufacturingImpact.class)
                 .mappedBy((typeSystem, record) -> new ManufacturingImpact(
                         nullableString(record, "workOrderId"),
                         nullableString(record, "status"),
-                        nullableLong(record, "remainingQty")))
+                        nullableLong(record, "remainingQty"),
+                        nullableString(record, "uom"),
+                        nullableString(record, "materialAvailabilityStatus")))
                 .all()
                 .stream()
                 .toList();
@@ -80,13 +88,14 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
         List<SalesOrderImpact> salesOrders = query("""
                 MATCH (:SUPPLIER {supplierId: $supplierId})<-[:SUPPLIED_BY]-(:COMPONENT)<-[:USES_COMPONENT]-(:REVISION)<-[:HAS_REVISION]-(p:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)
                 WHERE coalesce(so.openQuantity, 0) > 0
-                RETURN DISTINCT so.salesOrderId AS salesOrderId, so.orderValue AS orderValue
+                RETURN DISTINCT so.salesOrderId AS salesOrderId, so.orderValue AS orderValue, so.currency AS currency
                 ORDER BY so.salesOrderId
                 """, params)
                 .fetchAs(SalesOrderImpact.class)
                 .mappedBy((typeSystem, record) -> new SalesOrderImpact(
                         nullableString(record, "salesOrderId"),
-                        nullableDecimal(record, "orderValue")))
+                        nullableDecimal(record, "orderValue"),
+                        nullableString(record, "currency")))
                 .all()
                 .stream()
                 .toList();
@@ -115,7 +124,8 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 workOrders.size(),
                 salesOrders.size(),
                 customers.stream().map(CustomerImpact::customerId).distinct().count(),
-                revenueAtRisk);
+                revenueAtRisk,
+                singleCurrency(salesOrders));
         return new SupplierImpactResponse(
                 ImpactEntityType.SUPPLIER,
                 supplierId,
@@ -125,5 +135,14 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 workOrders,
                 salesOrders,
                 customers);
+    }
+
+    private String singleCurrency(List<SalesOrderImpact> salesOrders) {
+        List<String> currencies = salesOrders.stream()
+                .map(SalesOrderImpact::currency)
+                .filter(currency -> currency != null && !currency.isBlank())
+                .distinct()
+                .toList();
+        return currencies.size() == 1 ? currencies.getFirst() : null;
     }
 }

@@ -1,6 +1,7 @@
 package com.miae.analysis;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.neo4j.driver.Record;
@@ -69,5 +70,10 @@ abstract class Neo4jAnalysisSupport {
             return BigDecimal.valueOf(number.doubleValue());
         }
         return new BigDecimal(raw.toString());
+    }
+
+    protected LocalDate nullableLocalDate(Record record, String field) {
+        Value value = record.get(field);
+        return value.isNull() ? null : value.asLocalDate();
     }
 }

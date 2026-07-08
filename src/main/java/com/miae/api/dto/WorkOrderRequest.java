@@ -1,6 +1,7 @@
 package com.miae.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.miae.validation.MaterialAvailabilityStatus;
 import com.miae.validation.Priority;
 import com.miae.validation.WorkOrderStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,8 @@ public record WorkOrderRequest(
         @NotNull WorkOrderStatus status,
         @NotNull @PositiveOrZero Long remainingQty,
         @NotNull Priority priority,
-        @NotNull @JsonFormat(pattern = "dd/MM/yyyy") LocalDate plannedCompletionDate
+        @NotNull @JsonFormat(pattern = "dd/MM/yyyy") LocalDate plannedCompletionDate,
+        String uom,
+        MaterialAvailabilityStatus materialAvailabilityStatus
 ) {
 }

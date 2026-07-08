@@ -16,16 +16,18 @@ public class SalesOrderNode {
     private BigDecimal orderValue;
     private String priority;
     private String productId;
+    private String currency;
 
     public SalesOrderNode() {
     }
 
-    public SalesOrderNode(String salesOrderId, long openQuantity, BigDecimal orderValue, String priority, String productId) {
+    public SalesOrderNode(String salesOrderId, long openQuantity, BigDecimal orderValue, String priority, String productId, String currency) {
         this.salesOrderId = salesOrderId;
         this.openQuantity = openQuantity;
         this.orderValue = orderValue;
         this.priority = priority;
         this.productId = productId;
+        this.currency = currency;
     }
 
     public String getSalesOrderId() {
@@ -46,5 +48,9 @@ public class SalesOrderNode {
 
     public String getProductId() {
         return productId;
+    }
+
+    public String getCurrency() {
+        return currency;
     }
 }

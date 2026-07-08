@@ -19,6 +19,7 @@ public record SalesOrderRequest(
         @NotBlank String productId,
         @NotNull @PositiveOrZero Long openQuantity,
         @NotNull @PositiveOrZero BigDecimal orderValue,
-        @NotNull Priority priority
+        @NotNull Priority priority,
+        String currency
 ) {
 }
