@@ -123,6 +123,20 @@ src/main/java/com/miae
 - Neo4j schema script: `src/main/resources/neo4j/schema.cypher`
 - Neo4j sample graph script: `src/main/resources/neo4j/sample-data.cypher`
 
+## 🎥 Product Demo
+
+Watch the product demonstration(V1) on YouTube:
+
+▶️ https://www.youtube.com/watch?v=Y2BDPiLVJN0
+
+The demo covers:
+- Overview of MIAE
+- System Architecture
+- ERPNext Integration
+- Product Demonstration
+- Manufacturing Impact Analysis Copilot
+- Future Roadmap
+  
 ## Verification
 
 ```bash
