@@ -123,11 +123,13 @@ src/main/java/com/miae
 - Neo4j schema script: `src/main/resources/neo4j/schema.cypher`
 - Neo4j sample graph script: `src/main/resources/neo4j/sample-data.cypher`
 
-## 🎥 Product Demo
+## 🎥 Manufacturing Impact Analysis Engine (MIAE) Video Series
 
-Manufacturing Impact Analysis Engine (MIAE) Series on YouTube:
-▶️ https://www.youtube.com/watch?v=_PPflFTBubQ
-▶️ https://www.youtube.com/watch?v=Y2BDPiLVJN0
+Follow the complete MIAE journey—from architecture and design to implementation, demonstrations, and future enhancements.
+
+▶️ Architecture Walkthrough: https://www.youtube.com/watch?v=_PPflFTBubQ
+
+▶️ Product Demo: https://www.youtube.com/watch?v=Y2BDPiLVJN0
 
 These video focuses on::
 - Overview of MIAE
