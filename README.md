@@ -125,11 +125,11 @@ src/main/java/com/miae
 
 ## 🎥 Product Demo
 
-Watch the product demonstration(V1) on YouTube:
-
+Manufacturing Impact Analysis Engine (MIAE) Series on YouTube:
+▶️ https://www.youtube.com/watch?v=_PPflFTBubQ
 ▶️ https://www.youtube.com/watch?v=Y2BDPiLVJN0
 
-The demo covers:
+These video focuses on::
 - Overview of MIAE
 - System Architecture
 - ERPNext Integration
