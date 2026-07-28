@@ -33,8 +33,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(classes = MiaeApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("sft")
 @TestPropertySource(properties = {
-        "miae.security.enabled=true",
-        "miae.security.api-key=dev-api-key",
+        "miae.security.authentication-type=DEVELOPER_API_KEY",
+        "miae.security.api-key.value=dev-api-key",
         "miae.sample-data.enabled=false",
         "management.endpoint.health.show-details=always"
 })

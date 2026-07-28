@@ -2,7 +2,9 @@ const form = document.querySelector("#chatForm");
 const input = document.querySelector("#messageInput");
 const messages = document.querySelector("#messages");
 const sendButton = document.querySelector("#sendButton");
-const apiKeyInput = document.querySelector("#apiKey");
+const authType = document.querySelector("#authType");
+const credentialInput = document.querySelector("#credential");
+const credentialLabel = document.querySelector("#credentialLabel");
 
 const sessionId = crypto.randomUUID ? crypto.randomUUID() : `session-${Date.now()}`;
 const chatApiUrl = window.location.protocol === "file:"
@@ -18,6 +20,8 @@ document.querySelectorAll("[data-example]").forEach((button) => {
 });
 
 input.addEventListener("input", resizeInput);
+authType.addEventListener("change", updateCredentialPrompt);
+updateCredentialPrompt();
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -34,12 +38,16 @@ form.addEventListener("submit", async (event) => {
     setBusy(true);
 
     try {
+        const headers = { "Content-Type": "application/json" };
+        const credential = credentialInput.value.trim();
+        if (authType.value === "bearer") {
+            headers.Authorization = `Bearer ${credential}`;
+        } else {
+            headers["X-API-Key"] = credential;
+        }
         const response = await fetch(chatApiUrl, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-API-Key": apiKeyInput.value.trim()
-            },
+            headers,
             body: JSON.stringify({ message, sessionId })
         });
 
@@ -93,4 +101,11 @@ function setBusy(isBusy) {
 function resizeInput() {
     input.style.height = "auto";
     input.style.height = `${Math.min(input.scrollHeight, 140)}px`;
+}
+
+function updateCredentialPrompt() {
+    const bearer = authType.value === "bearer";
+    credentialLabel.textContent = bearer ? "Bearer token" : "API key";
+    credentialInput.placeholder = bearer ? "Paste a JWT" : "Enter API key";
+    credentialInput.value = bearer ? "" : "dev-api-key";
 }

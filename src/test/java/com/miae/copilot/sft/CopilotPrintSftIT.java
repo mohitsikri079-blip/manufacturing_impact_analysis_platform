@@ -33,8 +33,8 @@ import org.springframework.test.context.TestPropertySource;
 @Import(CopilotPrintSftIT.PrintSftConfig.class)
 @TestPropertySource(properties = {
         "copilot.enabled=true",
-        "miae.security.enabled=true",
-        "miae.security.api-key=dev-api-key",
+        "miae.security.authentication-type=DEVELOPER_API_KEY",
+        "miae.security.api-key.value=dev-api-key",
         "miae.sample-data.enabled=false"
 })
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")

@@ -14,10 +14,19 @@
                     <p class="eyebrow">Manufacturing Impact Copilot</p>
                     <h1>Impact analysis chat</h1>
                 </div>
-                <label class="api-key-field">
-                    <span>API key</span>
-                    <input id="apiKey" type="password" autocomplete="off" value="dev-api-key">
-                </label>
+                <div class="auth-fields">
+                    <label class="api-key-field" for="authType">
+                        <span>Authentication</span>
+                        <select id="authType">
+                            <option value="api-key">API key</option>
+                            <option value="bearer">Bearer token</option>
+                        </select>
+                    </label>
+                    <label class="api-key-field" for="credential">
+                        <span id="credentialLabel">API key</span>
+                        <input id="credential" type="password" autocomplete="off" value="dev-api-key">
+                    </label>
+                </div>
             </header>
 
             <div class="examples" aria-label="Example queries">
