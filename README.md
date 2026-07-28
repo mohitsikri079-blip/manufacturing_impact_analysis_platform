@@ -36,7 +36,7 @@ Open:
 - Health: `http://localhost:8080/actuator/health`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
-All `/api/**` requests require:
+All `/api/**` requests require authentication. The default developer configuration uses:
 
 ```text
 X-API-Key: dev-api-key
@@ -48,8 +48,9 @@ Override configuration with environment variables:
 NEO4J_URI=neo4j://127.0.0.1:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=password
-MIAE_API_KEY=dev-api-key
-MIAE_API_KEY_ENABLED=true
+MIAE_SECURITY_AUTHENTICATION_TYPE=DEVELOPER_API_KEY
+MIAE_SECURITY_API_KEY_HEADER_NAME=X-API-Key
+MIAE_SECURITY_API_KEY_VALUE=dev-api-key
 MIAE_SAMPLE_DATA_ENABLED=false
 ```
 
@@ -59,6 +60,71 @@ MIAE_SAMPLE_DATA_ENABLED=false
 mvn -DskipTests package
 docker compose up --build
 ```
+
+## JWT and JWKS authentication
+
+Authentication is selected only through configuration; no API or business-code changes are required. API-key mode remains the default for local development. In both JWT modes, MIAE validates the signature and expiry, plus issuer and audience when configured. Invalid or expired credentials return HTTP 401.
+
+To configure a mode directly in `src/main/resources/application.yml`, replace the `miae.security` block with one of the following. Environment variables shown below can still override these values in a container or deployment.
+
+Developer API key (default):
+
+```yaml
+miae:
+  security:
+    authentication-type: DEVELOPER_API_KEY
+    api-key:
+      header-name: X-API-Key
+      value: dev-api-key
+```
+
+JWT with an RSA public key. `location` supports either `file:` or `classpath:` resources:
+
+```yaml
+miae:
+  security:
+    authentication-type: JWT_PUBLIC_KEY
+    public-key:
+      location: file:/opt/miae/security/public-key.pem
+    issuer: ERPNext       # optional
+    audience: miae-api    # optional
+    clock-skew: 60s       # optional; defaults to 60s
+```
+
+JWT with a JWKS endpoint. The decoder resolves signing keys by `kid` and refreshes its JWKS cache when a new key is encountered:
+
+```yaml
+miae:
+  security:
+    authentication-type: JWKS
+    jwks:
+      uri: https://erp.company.com/.well-known/jwks.json
+    issuer: ERPNext       # optional
+    audience: miae-api    # optional
+    clock-skew: 60s       # optional; defaults to 60s
+```
+
+For a PEM-encoded RSA public key available to the application:
+
+```bash
+MIAE_SECURITY_AUTHENTICATION_TYPE=JWT_PUBLIC_KEY
+MIAE_SECURITY_PUBLIC_KEY_LOCATION=file:/opt/miae/security/public-key.pem
+MIAE_SECURITY_ISSUER=ERPVendor
+MIAE_SECURITY_AUDIENCE=miae-api
+MIAE_SECURITY_CLOCK_SKEW=60s
+```
+
+For an ERP or identity provider JWKS endpoint (including key rotation):
+
+```bash
+MIAE_SECURITY_AUTHENTICATION_TYPE=JWKS
+MIAE_SECURITY_JWKS_URI=https://erp.company.com/.well-known/jwks.json
+MIAE_SECURITY_ISSUER=ERPVendor
+MIAE_SECURITY_AUDIENCE=miae-api
+MIAE_SECURITY_CLOCK_SKEW=60s
+```
+
+JWT modes expect `Authorization: Bearer <JWT>`. The Copilot page provides an authentication selector for either API key or Bearer token; API key remains its default.
 
 Compose starts:
 

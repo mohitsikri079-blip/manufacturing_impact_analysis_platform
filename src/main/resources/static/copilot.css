@@ -89,6 +89,21 @@ h1 {
     background: #fff;
 }
 
+.auth-fields {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+}
+
+.api-key-field select {
+    height: 38px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 8px;
+    background: #fff;
+    color: var(--text);
+}
+
 .examples {
     display: flex;
     gap: 10px;
@@ -173,7 +188,8 @@ h1 {
 }
 
 .composer textarea:focus,
-.api-key-field input:focus {
+.api-key-field input:focus,
+.api-key-field select:focus {
     border-color: var(--accent);
     outline: 3px solid rgba(31, 111, 235, 0.14);
 }
@@ -227,6 +243,8 @@ h1 {
     .api-key-field {
         min-width: 0;
     }
+
+    .auth-fields { align-items: stretch; flex-direction: column; }
 
     .examples,
     .messages,

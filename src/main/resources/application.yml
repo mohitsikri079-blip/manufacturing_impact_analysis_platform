@@ -12,8 +12,17 @@ spring:
 
 miae:
   security:
-    api-key: ${MIAE_API_KEY:dev-api-key}
-    enabled: ${MIAE_API_KEY_ENABLED:true}
+    authentication-type: ${MIAE_SECURITY_AUTHENTICATION_TYPE:DEVELOPER_API_KEY}
+    api-key:
+      header-name: ${MIAE_SECURITY_API_KEY_HEADER_NAME:X-API-Key}
+      value: ${MIAE_SECURITY_API_KEY_VALUE:${MIAE_API_KEY:dev-api-key}}
+    public-key:
+      location: ${MIAE_SECURITY_PUBLIC_KEY_LOCATION:}
+    jwks:
+      uri: ${MIAE_SECURITY_JWKS_URI:}
+    issuer: ${MIAE_SECURITY_ISSUER:}
+    audience: ${MIAE_SECURITY_AUDIENCE:}
+    clock-skew: ${MIAE_SECURITY_CLOCK_SKEW:60s}
   sample-data:
     enabled: ${MIAE_SAMPLE_DATA_ENABLED:false}
 
