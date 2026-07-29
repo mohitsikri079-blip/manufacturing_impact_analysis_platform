@@ -3,6 +3,8 @@ package com.miae.api;
 import com.miae.api.dto.AckResponse;
 import com.miae.api.dto.InventoryRequest;
 import com.miae.service.InventoryProjectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/inventory")
+@Tag(name = "Ingestion", description = "Upserts ERP manufacturing records into the MIAE knowledge graph.")
 public class InventoryController {
 
     private final InventoryProjectionService service;
@@ -31,6 +34,7 @@ public class InventoryController {
     }
 
     @PostMapping
+    @Operation(summary = "Upsert inventory", description = "Creates or updates component inventory at a warehouse location.")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AckResponse upsert(@Valid @RequestBody InventoryRequest request) {
         return AckResponse.upserted(service.upsert(request));

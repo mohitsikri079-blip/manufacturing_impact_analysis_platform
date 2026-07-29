@@ -3,6 +3,8 @@ package com.miae.api;
 import com.miae.api.dto.AckResponse;
 import com.miae.api.dto.SupplierMappingRequest;
 import com.miae.service.SupplierProjectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/suppliers")
+@Tag(name = "Ingestion", description = "Upserts ERP manufacturing records into the MIAE knowledge graph.")
 public class SupplierController {
 
     private final SupplierProjectionService service;
@@ -29,6 +32,7 @@ public class SupplierController {
     }
 
     @PostMapping
+    @Operation(summary = "Upsert supplier mapping", description = "Creates or updates the supplier mapping for a component.")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AckResponse upsert(@Valid @RequestBody SupplierMappingRequest request) {
         return AckResponse.upserted(service.upsert(request));

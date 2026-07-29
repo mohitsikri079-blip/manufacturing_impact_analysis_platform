@@ -3,6 +3,8 @@ package com.miae.api;
 import com.miae.api.dto.AckResponse;
 import com.miae.api.dto.ProductRequest;
 import com.miae.service.ProductProjectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/products")
+@Tag(name = "Ingestion", description = "Upserts ERP manufacturing records into the MIAE knowledge graph.")
 public class ProductController {
 
     private final ProductProjectionService service;
@@ -31,6 +34,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @Operation(summary = "Upsert product", description = "Creates or updates a product record. Returns HTTP 202 when accepted.")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AckResponse upsert(@Valid @RequestBody ProductRequest request) {
         return AckResponse.upserted(service.upsert(request));

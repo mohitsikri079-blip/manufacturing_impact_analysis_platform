@@ -3,6 +3,8 @@ package com.miae.api;
 import com.miae.api.dto.AckResponse;
 import com.miae.api.dto.WorkOrderRequest;
 import com.miae.service.OrderProjectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/work-orders")
+@Tag(name = "Ingestion", description = "Upserts ERP manufacturing records into the MIAE knowledge graph.")
 public class WorkOrderController {
 
     private final OrderProjectionService service;
@@ -29,6 +32,7 @@ public class WorkOrderController {
     }
 
     @PostMapping
+    @Operation(summary = "Upsert work order", description = "Creates or updates a manufacturing work order.")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AckResponse upsert(@Valid @RequestBody WorkOrderRequest request) {
         return AckResponse.upserted(service.upsertWorkOrder(request));

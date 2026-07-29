@@ -3,6 +3,8 @@ package com.miae.api;
 import com.miae.api.dto.AckResponse;
 import com.miae.api.dto.BomRequest;
 import com.miae.service.BomProjectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/boms")
+@Tag(name = "Ingestion", description = "Upserts ERP manufacturing records into the MIAE knowledge graph.")
 public class BomController {
 
     private final BomProjectionService service;
@@ -31,6 +34,7 @@ public class BomController {
     }
 
     @PostMapping
+    @Operation(summary = "Upsert bill of materials", description = "Creates or updates a revision-to-component bill of materials mapping.")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AckResponse upsert(@Valid @RequestBody BomRequest request) {
         return AckResponse.upserted(service.upsert(request));

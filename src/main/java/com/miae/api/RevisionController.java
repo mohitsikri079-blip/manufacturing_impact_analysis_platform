@@ -3,6 +3,8 @@ package com.miae.api;
 import com.miae.api.dto.AckResponse;
 import com.miae.api.dto.RevisionRequest;
 import com.miae.service.RevisionProjectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/revisions")
+@Tag(name = "Ingestion", description = "Upserts ERP manufacturing records into the MIAE knowledge graph.")
 public class RevisionController {
 
     private final RevisionProjectionService service;
@@ -31,6 +34,7 @@ public class RevisionController {
     }
 
     @PostMapping
+    @Operation(summary = "Upsert revision", description = "Creates or updates a product revision.")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public AckResponse upsert(@Valid @RequestBody RevisionRequest request) {
         return AckResponse.upserted(service.upsert(request));
