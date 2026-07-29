@@ -16,15 +16,25 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI miaeOpenApi() {
         String apiKeyScheme = "ApiKeyAuth";
+        String bearerScheme = "BearerAuth";
         return new OpenAPI()
                 .info(new Info()
                         .title("Manufacturing Impact Analysis Engine API")
                         .version("0.1.0")
-                        .description("Ingests manufacturing ERP events into Neo4j and exposes deterministic impact analysis APIs."))
+                        .description("Ingests manufacturing ERP events into Neo4j and exposes deterministic impact analysis APIs. "
+                                + "Authentication is selected by MIAE configuration: use the API key scheme for DEVELOPER_API_KEY, "
+                                + "or Bearer JWT for JWT_PUBLIC_KEY and JWKS deployments."))
                 .addSecurityItem(new SecurityRequirement().addList(apiKeyScheme))
+                .addSecurityItem(new SecurityRequirement().addList(bearerScheme))
                 .schemaRequirement(apiKeyScheme, new SecurityScheme()
                         .name("X-API-Key")
                         .type(SecurityScheme.Type.APIKEY)
-                        .in(SecurityScheme.In.HEADER));
+                        .in(SecurityScheme.In.HEADER)
+                        .description("Use when miae.security.authentication-type is DEVELOPER_API_KEY."))
+                .schemaRequirement(bearerScheme, new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")
+                        .description("Use when miae.security.authentication-type is JWT_PUBLIC_KEY or JWKS."));
     }
 }

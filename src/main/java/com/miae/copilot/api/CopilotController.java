@@ -3,6 +3,10 @@ package com.miae.copilot.api;
 import com.miae.copilot.dto.ChatRequest;
 import com.miae.copilot.dto.ChatResponse;
 import com.miae.copilot.service.CopilotService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/chat")
+@Tag(name = "Copilot", description = "Natural-language manufacturing impact analysis backed by the MIAE impact engine.")
 public class CopilotController {
 
     private final CopilotService copilotService;
@@ -26,6 +31,13 @@ public class CopilotController {
     }
 
     @PostMapping
+    @Operation(summary = "Send a Copilot message", description = "Interprets a manufacturing-impact question and returns a contextual chat response.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Copilot response generated."),
+            @ApiResponse(responseCode = "400", description = "The request is invalid."),
+            @ApiResponse(responseCode = "401", description = "Authentication is missing or invalid."),
+            @ApiResponse(responseCode = "503", description = "Copilot is unavailable or not configured.")
+    })
     public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
         return copilotService.chat(request);
     }
