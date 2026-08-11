@@ -7,6 +7,10 @@ Detailed requirements, architecture, and design documentation for the Manufactur
 ## Problem
 Today, impact analysis is often a manual process involving multiple teams and systems. Manufacturing organizations struggle to understand the downstream impact of engineering changes, since there are multiple disconnected business systems like ERP, PLM, Inventory, Supplier etc. Without timely impact visibility, production planning slows, procurement cannot respond proactively, customer commitments become uncertain, and overall business risk increases. If a component becomes unavailable or a revision changes, teams need to quickly understand affected products, work orders, suppliers, inventory, and customer orders.
 
+## From Disconnected Data to Manufacturing Intelligence
+> Transform disconnected manufacturing data into connected intelligence.
+![MIAE Story](docs/miae-scene-flow.gif)
+
 ## Stack
 
 - Java 21
