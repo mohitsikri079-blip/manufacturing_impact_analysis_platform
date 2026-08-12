@@ -109,9 +109,16 @@ class ManufacturingApiSftIT {
         assertThat(component.getBody()).containsEntry("entityType", "COMPONENT");
         assertThat(map(component, "summary")).containsEntry("usedByProducts", 1);
         assertThat(map(component, "summary")).containsEntry("affectedPurchaseOrders", 1);
+        assertThat(map(component, "summary")).containsEntry("affectedSalesOrders", 1);
+        assertThat(map(component, "summary")).containsEntry("affectedCustomers", 1);
+        assertThat(map(component, "summary")).containsEntry("revenueAtRisk", 50000.0);
+        assertThat(map(component, "summary")).containsEntry("revenueCurrency", "USD");
         assertThat(firstMap(component, "inventory")).containsEntry("uom", "Pcs");
         assertThat(firstMap(component, "purchaseOrders")).containsEntry("uom", "Pcs");
         assertThat(firstMap(component, "purchaseOrders")).containsEntry("expectedDeliveryDate", "2026-02-10");
+        assertThat(firstMap(component, "affectedSalesOrders")).containsEntry("salesOrderId", "SO-100");
+        assertThat(firstMap(component, "affectedSalesOrders")).containsEntry("currency", "USD");
+        assertThat(firstMap(component, "affectedCustomers")).containsEntry("customerId", "CUST-100");
 
         ResponseEntity<Map<String, Object>> workOrderComponent = postMap("/api/v1/impact-analysis", Map.of(
                 "entityType", "COMPONENT",

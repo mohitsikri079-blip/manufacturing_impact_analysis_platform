@@ -1,12 +1,15 @@
 package com.miae.analysis;
 
 import com.miae.api.dto.impact.ComponentImpactResponse;
+import com.miae.api.dto.impact.CustomerImpact;
 import com.miae.api.dto.impact.InventoryImpact;
 import com.miae.api.dto.impact.ManufacturingImpact;
 import com.miae.api.dto.impact.ProcurementImpact;
 import com.miae.api.dto.impact.ProductUsageImpact;
 import com.miae.api.dto.impact.SupplierImpactItem;
+import com.miae.api.dto.impact.SalesOrderImpact;
 import com.miae.exception.ResourceNotFoundException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.neo4j.core.Neo4jClient;
@@ -120,13 +123,51 @@ public class ComponentImpactStrategy extends Neo4jAnalysisSupport implements Imp
                 .stream()
                 .toList();
 
+        List<SalesOrderImpact> salesOrders = query("""
+                MATCH (:COMPONENT {componentId: $componentId})<-[:USES_COMPONENT]-(:REVISION)<-[:HAS_REVISION]-(p:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)
+                WHERE coalesce(so.openQuantity, 0) > 0
+                RETURN DISTINCT so.salesOrderId AS salesOrderId, so.orderValue AS orderValue, so.currency AS currency
+                ORDER BY so.salesOrderId
+                """, params)
+                .fetchAs(SalesOrderImpact.class)
+                .mappedBy((typeSystem, record) -> new SalesOrderImpact(
+                        nullableString(record, "salesOrderId"),
+                        nullableDecimal(record, "orderValue"),
+                        nullableString(record, "currency")))
+                .all()
+                .stream()
+                .toList();
+
+        List<CustomerImpact> customers = query("""
+                MATCH (:COMPONENT {componentId: $componentId})<-[:USES_COMPONENT]-(:REVISION)<-[:HAS_REVISION]-(p:PRODUCT)<-[:ORDERS]-(so:SALES_ORDER)<-[:PLACED]-(c:CUSTOMER)
+                WHERE coalesce(so.openQuantity, 0) > 0
+                RETURN DISTINCT c.customerId AS customerId, c.customerName AS customerName, so.salesOrderId AS salesOrderId
+                ORDER BY c.customerId, so.salesOrderId
+                """, params)
+                .fetchAs(CustomerImpact.class)
+                .mappedBy((typeSystem, record) -> new CustomerImpact(
+                        nullableString(record, "customerId"),
+                        nullableString(record, "customerName"),
+                        nullableString(record, "salesOrderId")))
+                .all()
+                .stream()
+                .toList();
+
+        BigDecimal revenueAtRisk = salesOrders.stream()
+                .map(SalesOrderImpact::orderValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         ComponentImpactResponse.Summary summary = new ComponentImpactResponse.Summary(
                 productUsage.stream().map(ProductUsageImpact::productId).distinct().count(),
                 productUsage.stream().map(ProductUsageImpact::revisionId).distinct().count(),
                 inventory.size(),
                 purchaseOrders.size(),
                 workOrders.size(),
-                suppliers.size());
+                suppliers.size(),
+                salesOrders.size(),
+                customers.stream().map(CustomerImpact::customerId).distinct().count(),
+                revenueAtRisk,
+                singleCurrency(salesOrders));
         return new ComponentImpactResponse(
                 ImpactEntityType.COMPONENT,
                 componentId,
@@ -135,6 +176,17 @@ public class ComponentImpactStrategy extends Neo4jAnalysisSupport implements Imp
                 inventory,
                 suppliers,
                 purchaseOrders,
-                workOrders);
+                workOrders,
+                salesOrders,
+                customers);
+    }
+
+    private String singleCurrency(List<SalesOrderImpact> salesOrders) {
+        List<String> currencies = salesOrders.stream()
+                .map(SalesOrderImpact::currency)
+                .filter(currency -> currency != null && !currency.isBlank())
+                .distinct()
+                .toList();
+        return currencies.size() == 1 ? currencies.getFirst() : null;
     }
 }
