@@ -1,6 +1,7 @@
 package com.miae.api.dto.impact;
 
 import com.miae.analysis.ImpactEntityType;
+import java.math.BigDecimal;
 import java.util.List;
 
 public record ComponentImpactResponse(
@@ -11,7 +12,9 @@ public record ComponentImpactResponse(
         List<InventoryImpact> inventory,
         List<SupplierImpactItem> suppliers,
         List<ProcurementImpact> purchaseOrders,
-        List<ManufacturingImpact> workOrders
+        List<ManufacturingImpact> workOrders,
+        List<SalesOrderImpact> affectedSalesOrders,
+        List<CustomerImpact> affectedCustomers
 ) {
     public record Summary(
             long usedByProducts,
@@ -19,7 +22,11 @@ public record ComponentImpactResponse(
             long inventoryRecords,
             long affectedPurchaseOrders,
             long affectedWorkOrders,
-            long suppliers
+            long suppliers,
+            long affectedSalesOrders,
+            long affectedCustomers,
+            BigDecimal revenueAtRisk,
+            String revenueCurrency
     ) {
     }
 }

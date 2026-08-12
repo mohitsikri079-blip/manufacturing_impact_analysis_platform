@@ -183,6 +183,10 @@ class CopilotPrintSftIT {
                     summary.put("openPurchaseOrders", 1);
                     summary.put("affectedWorkOrders", 1);
                     summary.put("suppliers", 1);
+                    summary.put("affectedSalesOrders", 1);
+                    summary.put("affectedCustomers", 1);
+                    summary.put("revenueAtRisk", orderValue);
+                    summary.put("revenueCurrency", "USD");
 
                     Map<String, Object> response = new LinkedHashMap<>();
                     response.put("entityType", ImpactEntityType.COMPONENT.name());
