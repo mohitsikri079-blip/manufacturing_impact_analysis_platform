@@ -163,7 +163,7 @@ public class ComponentImpactStrategy extends Neo4jAnalysisSupport implements Imp
                 inventory.size(),
                 purchaseOrders.size(),
                 workOrders.size(),
-                workOrders.stream().mapToLong(ManufacturingImpact::remainingQty).sum(),
+                productionQuantityAtRisk(workOrders),
                 suppliers.size(),
                 salesOrders.size(),
                 customers.stream().map(CustomerImpact::customerId).distinct().count(),

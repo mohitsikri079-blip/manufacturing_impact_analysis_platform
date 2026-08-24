@@ -96,7 +96,7 @@ public class RevisionImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 inventory.size(),
                 purchaseOrders.size(),
                 workOrders.size(),
-                workOrders.stream().mapToLong(ManufacturingImpact::remainingQty).sum(),
+                productionQuantityAtRisk(workOrders),
                 salesOrderCount,
                 customers.stream().map(CustomerImpact::customerId).distinct().count(),
                 revenueAtRisk,

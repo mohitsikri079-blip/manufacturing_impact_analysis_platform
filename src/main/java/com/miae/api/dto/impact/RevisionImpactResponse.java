@@ -1,5 +1,6 @@
 package com.miae.api.dto.impact;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.miae.analysis.ImpactEntityType;
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,7 +21,7 @@ public record RevisionImpactResponse(
             long affectedInventoryRecords,
             long affectedPurchaseOrders,
             long affectedWorkOrders,
-            long productionQuantityAtRisk,
+            @JsonInclude(JsonInclude.Include.NON_NULL) Long productionQuantityAtRisk,
             long affectedSalesOrders,
             long affectedCustomers,
             BigDecimal revenueAtRisk,

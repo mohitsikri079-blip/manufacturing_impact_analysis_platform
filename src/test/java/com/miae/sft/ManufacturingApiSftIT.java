@@ -110,7 +110,7 @@ class ManufacturingApiSftIT {
         assertThat(component.getBody()).containsEntry("entityType", "COMPONENT");
         assertThat(map(component, "summary")).containsEntry("usedByProducts", 1);
         assertThat(map(component, "summary")).containsEntry("affectedPurchaseOrders", 1);
-        assertThat(map(component, "summary")).containsEntry("productionQuantityAtRisk", 0);
+        assertThat(map(component, "summary")).doesNotContainKey("productionQuantityAtRisk");
         assertThat(map(component, "summary")).containsEntry("affectedSalesOrders", 1);
         assertThat(map(component, "summary")).containsEntry("affectedCustomers", 1);
         assertThat(map(component, "summary")).containsEntry("revenueAtRisk", 50000.0);
