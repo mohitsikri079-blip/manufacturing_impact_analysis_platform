@@ -1,5 +1,6 @@
 package com.miae.analysis;
 
+import com.miae.api.dto.impact.ManufacturingImpact;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -55,6 +56,18 @@ abstract class Neo4jAnalysisSupport {
     protected long nullableLong(Record record, String field) {
         Value value = record.get(field);
         return value.isNull() ? 0L : value.asLong();
+    }
+
+    protected Long productionQuantityAtRisk(List<ManufacturingImpact> workOrders) {
+        if (workOrders.isEmpty()) {
+            return null;
+        }
+        String uom = workOrders.getFirst().uom();
+        if (uom == null || uom.isBlank()
+                || workOrders.stream().anyMatch(workOrder -> !uom.equals(workOrder.uom()))) {
+            return null;
+        }
+        return workOrders.stream().mapToLong(ManufacturingImpact::remainingQty).sum();
     }
 
     protected BigDecimal nullableDecimal(Record record, String field) {

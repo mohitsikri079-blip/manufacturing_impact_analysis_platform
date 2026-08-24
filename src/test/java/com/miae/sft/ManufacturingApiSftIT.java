@@ -96,6 +96,7 @@ class ManufacturingApiSftIT {
         ));
         assertThat(revision.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(revision.getBody()).containsEntry("entityType", "REVISION");
+        assertThat(map(revision, "summary")).containsEntry("productionQuantityAtRisk", 50);
         assertThat(map(revision, "summary")).containsEntry("affectedSalesOrders", 1);
         assertThat(map(revision, "summary")).containsEntry("affectedCustomers", 1);
         assertThat(map(revision, "changeSummary")).containsKey("removedComponents");
@@ -109,6 +110,7 @@ class ManufacturingApiSftIT {
         assertThat(component.getBody()).containsEntry("entityType", "COMPONENT");
         assertThat(map(component, "summary")).containsEntry("usedByProducts", 1);
         assertThat(map(component, "summary")).containsEntry("affectedPurchaseOrders", 1);
+        assertThat(map(component, "summary")).doesNotContainKey("productionQuantityAtRisk");
         assertThat(map(component, "summary")).containsEntry("affectedSalesOrders", 1);
         assertThat(map(component, "summary")).containsEntry("affectedCustomers", 1);
         assertThat(map(component, "summary")).containsEntry("revenueAtRisk", 50000.0);
@@ -125,6 +127,7 @@ class ManufacturingApiSftIT {
                 "entityId", "PCB-B"
         ));
         assertThat(workOrderComponent.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(map(workOrderComponent, "summary")).containsEntry("productionQuantityAtRisk", 50);
         assertThat(firstMap(workOrderComponent, "workOrders")).containsEntry("uom", "Box");
         assertThat(firstMap(workOrderComponent, "workOrders")).containsEntry("materialAvailabilityStatus", "READY");
 
@@ -135,6 +138,7 @@ class ManufacturingApiSftIT {
         assertThat(supplier.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(supplier.getBody()).containsEntry("entityType", "SUPPLIER");
         assertThat(map(supplier, "summary")).containsEntry("suppliedComponents", 2);
+        assertThat(map(supplier, "summary")).containsEntry("productionQuantityAtRisk", 50);
         assertThat(map(supplier, "summary")).containsEntry("affectedCustomers", 1);
         assertThat(map(supplier, "summary")).containsEntry("revenueAtRisk", 50000.0);
         assertThat(map(supplier, "summary")).containsEntry("revenueCurrency", "USD");
