@@ -18,6 +18,7 @@ public record SupplierImpactResponse(
             long suppliedComponents,
             long affectedProducts,
             long affectedWorkOrders,
+            long productionQuantityAtRisk,
             long affectedSalesOrders,
             long affectedCustomers,
             BigDecimal revenueAtRisk,

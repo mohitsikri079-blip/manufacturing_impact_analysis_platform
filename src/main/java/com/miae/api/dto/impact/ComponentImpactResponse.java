@@ -22,6 +22,7 @@ public record ComponentImpactResponse(
             long inventoryRecords,
             long affectedPurchaseOrders,
             long affectedWorkOrders,
+            long productionQuantityAtRisk,
             long suppliers,
             long affectedSalesOrders,
             long affectedCustomers,

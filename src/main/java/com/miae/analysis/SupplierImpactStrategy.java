@@ -122,6 +122,7 @@ public class SupplierImpactStrategy extends Neo4jAnalysisSupport implements Impa
                 components.size(),
                 products.size(),
                 workOrders.size(),
+                workOrders.stream().mapToLong(ManufacturingImpact::remainingQty).sum(),
                 salesOrders.size(),
                 customers.stream().map(CustomerImpact::customerId).distinct().count(),
                 revenueAtRisk,

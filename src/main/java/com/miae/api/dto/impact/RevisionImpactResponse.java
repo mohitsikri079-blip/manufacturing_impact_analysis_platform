@@ -20,6 +20,7 @@ public record RevisionImpactResponse(
             long affectedInventoryRecords,
             long affectedPurchaseOrders,
             long affectedWorkOrders,
+            long productionQuantityAtRisk,
             long affectedSalesOrders,
             long affectedCustomers,
             BigDecimal revenueAtRisk,
